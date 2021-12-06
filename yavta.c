@@ -1060,6 +1060,8 @@ int main(int argc, char *argv[])
 #endif
 			else if (strcasecmp(optarg, "DV") == 0)
 				pixelformat = V4L2_PIX_FMT_DV;
+			else if (strcasecmp(optarg, "NV12") == 0)
+				pixelformat = V4L2_PIX_FMT_NV12;
 			else {
 				printf("Unsupported video format '%s'\n", optarg);
 				return 1;
