@@ -21,6 +21,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -38,6 +39,17 @@
 #endif
 
 #define ARRAY_SIZE(a)	(sizeof(a)/sizeof((a)[0]))
+
+static int log_level = 1;
+int yavta_log(const char *fmt, ...) {
+    va_list args;
+    if(log_level == 0) return 0;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+    return 0;
+}
+#define printf yavta_log
 
 struct buffer
 {
@@ -948,6 +960,7 @@ static void usage(const char *argv0)
 	printf("-s, --size WxH			Set the frame size\n");
 	printf("-t, --time-per-frame num/denom	Set the time per frame (eg. 1/25 = 25 fps)\n");
 	printf("-u, --userptr			Use the user pointers streaming method\n");
+	printf("-z, --z 			Do not print log\n");
 	printf("-w, --set-control 'ctrl value'	Set control 'ctrl' to 'value'\n");
 	printf("    --enum-formats		Enumerate formats\n");
 	printf("    --enum-inputs		Enumerate inputs\n");
@@ -989,6 +1002,7 @@ static struct option opts[] = {
 	{"sleep-forever", 0, 0, OPT_SLEEP_FOREVER},
 	{"time-per-frame", 1, 0, 't'},
 	{"userptr", 0, 0, 'u'},
+	{"z", 0, 0, 'z'},
 	{0, 0, 0, 0}
 };
 
@@ -1029,7 +1043,7 @@ int main(int argc, char *argv[])
 	const char *filename = "/dev/shm/capture.output";
 
 	opterr = 0;
-	while ((c = getopt_long(argc, argv, "c::d:f:F::hi:ln:pq:r:s:t:uw:", opts, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, "c::d:f:F::hi:ln:pq:r:s:t:uwz", opts, NULL)) != -1) {
 
 		switch (c) {
 		case 'c':
@@ -1142,6 +1156,9 @@ int main(int argc, char *argv[])
 				return 1;
 			}
 			do_set_control = 1;
+			break;
+		case 'z':
+			log_level = 0;
 			break;
 		case OPT_ENUM_FORMATS:
 			do_enum_formats = 1;
